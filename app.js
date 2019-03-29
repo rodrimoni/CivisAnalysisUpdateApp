@@ -8,6 +8,8 @@ var path = require('path');
 
 var app = express();
 var db;
+const begin = 1991;
+const end = 2018;
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://admin:admin@civisanalysisdb-rgysv.mongodb.net/test?retryWrites=true";
@@ -21,9 +23,15 @@ MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	if (err) return console.log(err);  
 	db = client.db("CivisAnalysis");
 	
+	var years = [];
+	for (i = begin; i < end+1; i++)
+	{
+		years.push(i);
+	}
+
 	// functions to update DB... HTTP GET from camara.gov --------------------------------------
 	app.get('/obterDeputados', camara.obterDeputados(db));
-	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db));
+	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db, years));
 	app.get('/obterVotacaoProposicao/:tipo/:numero/:ano', camara.obterVotacaoProposicao(db));
 	app.get('/obterProposicao/:tipo/:numero/:ano', camara.obterProposicao(db));
 	

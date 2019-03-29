@@ -10,7 +10,7 @@ xml2js.defaults['0.2'].explicitArray = false;
 xml2js.defaults['0.2'].mergeAttrs    = true;
 // ------------------------------------------
 
-var request = require('request');
+var rp = require('request-promise');
 
 exports.obterDeputados = function(db){ 
 return function(req, res){
@@ -37,34 +37,6 @@ return function(req, res){
 	};	
 };
 
-
-// Get the list of all 'articles' voted in plenary (representatives chamber = camara dos deputados)
-exports.listarProposicoesVotadasEmPlenario = function(db){
-return function(req, res){
-	var ano = req.params.ano; // get the list of roll calls in the year(==ano)
-	// GET from camara the response
-	request.get('https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoesVotadasEmPlenario?ano='+ano+'&tipo=', 
-	{}, 
-	(err, result, body) => {
-			if (err) {
-				console.error(error)
-				return
-			}
-			console.log(`statusCode: ${result.statusCode}`)
-			xml2js.parseString(body, function(err,json){ 
-				if (err) {
-					console.error(error)
-					return
-				}
-				db.collection('listarProposicoesVotadasEmPlenario').update({ano:ano},{ano:ano,data:json},{upsert:true}, function(err, result){
-				res.json(
-                  (err === null) ? {ano:ano, data:json} : { msg: err }
-                );
-              });
-			})
-		})
-	};  
-};
 
 //
 // INSERT in the new entries => datetime = new Date(year, month, day, hours, minutes, seconds, milliseconds);
@@ -172,3 +144,39 @@ function fixFormatObterVotacaoProposicao(json){
 function isArray(obj) {
 	return Object.prototype.toString.call(obj) === '[object Array]';
 }
+
+exports.listarTodasProposicoesVotadasEmPlenario = function(db, anos){
+	return function(req, res) {
+		var promises = anos.map(function (ano){
+			return listarProposicoesVotadasEmPlenario(db, ano);
+		})
+
+		Promise.all(promises).then(function(results){
+			res.send(results.join("<br/>"));
+		});
+	}
+}
+
+// Get the list of all 'articles' voted in plenary (representatives chamber = camara dos deputados)
+function listarProposicoesVotadasEmPlenario (db, ano){
+	var reqCamara = {
+		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ListarProposicoesVotadasEmPlenario?ano='+ano+'&tipo=',
+		json: false
+	};
+
+	return rp(reqCamara)
+		.then(function(body){
+			xml2js.parseString(body, function(err,json){ 
+				if (err) {
+					console.error(error)
+					return
+				}
+				db.collection('listarProposicoesVotadasEmPlenario').updateOne({ano:ano}, {$set: {ano:ano,data:json}},{upsert:true});
+			})
+			return "Ano " + ano + " carregado com sucesso!"
+		})
+		.catch(function(err){
+            console.log('Não foi possivel carregar as proposições' , err);
+            throw err;
+		});
+	}; 
