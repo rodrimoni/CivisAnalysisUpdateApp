@@ -19,6 +19,7 @@ app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
+
 MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	if (err) return console.log(err);  
 	db = client.db("CivisAnalysis");
@@ -30,7 +31,7 @@ MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	}
 
 	// functions to update DB... HTTP GET from camara.gov --------------------------------------
-	app.get('/obterDeputados', camara.obterDeputados(db));
+	app.get('/getMotionRollCallsInYear/:ano', camara.getMotionRollCallsInYear(db));
 	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db, years));
 	app.get('/obterVotacaoProposicao/:tipo/:numero/:ano', camara.obterVotacaoProposicao(db));
 	app.get('/obterProposicao/:tipo/:numero/:ano', camara.obterProposicao(db));
