@@ -90,35 +90,26 @@ return function(req, res){
 };
   
 exports.obterProposicao = function(db){
-return function(req, res){
-	var ano = req.params.ano;
-	var tipo = req.params.tipo;
-	var numero = req.params.numero;
-	request.get('http://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
-	{}, 
-	(err, result, body) => { 
-		if (err) {
-			console.error(error)
-			return
-		}
-		console.log(`statusCode: ${result.statusCode}`)	
-		xml2js.parseString(body, function(err,json){ 
-				if (err) {
-					console.error(error)
-					return
-				}
-				//FIX the proposicao.tipo => sometimes with whitespaces++
-				//console.log(json.proposicao.tipo);
-				json.proposicao.tipo = json.proposicao.tipo.trim();
-
-				db.collection('obterProposicao')
-					.update({'proposicao.tipo':tipo,'proposicao.numero':numero,'proposicao.ano':ano}, json,{upsert:true}, function(err, result){
-					res.json(
-						(err === null) ? json : { msg: err }
-					);
-				});
-		})
-	});
+	return function(req, res){
+		var counts = {};
+		var ano = parseInt(req.params.ano);
+		db.collection('obterProposicaoVerificador')
+			.find()
+			.toArray()
+			.then(resultado => {
+				resultado.map(elem => {
+					db.collection('obterVotacaoProposicao').findOne({'proposicao.Sigla':elem.proposicao.tipo, 'proposicao.Numero':elem.proposicao.numero, 'proposicao.Ano':elem.proposicao.ano})
+					.then(votacao => {
+						if (votacao === null)
+							console.log(elem);
+						else
+							console.log("ok");
+					})	
+				})
+			})
+			.catch(error =>{
+				console.log(error);
+			})
 	};  
 };
 
@@ -182,11 +173,38 @@ function listarProposicoesVotadasEmPlenario (db, ano){
 		});
 	}; 
 
-exports.getMotionRollCallsInYear = function(db)
+
+exports.obterTodasProposicoes = function(db, anos)
 {
 	return function(req, res) {
-		var ano = parseInt(req.params.ano);
+		var promises = anos.map(function (ano){
+			return obterProposicoesPorAno(db, ano);
+		})
 
+		Promise.all(promises).then(function(results){
+			res.end("Proposicoes carregadas " + successfulYears);
+		});
+	}
+}
+
+exports.obterTodasVotacoesProposicoes = function(db, anos)
+{
+	return function(req, res) {
+		var promises = anos.map(function (ano){
+			return obterVotacoesProposicoesPorAno(db, ano);
+		})
+
+		Promise.all(promises).then(function(results){
+			res.end("Proposicoes carregadas " + successfulYears);
+		});
+	}
+}
+
+var successfulYears = [];
+
+function obterProposicoesPorAno (db, ano)
+{
+	return new Promise ((resolve, reject) => {
 		db.collection('listarProposicoesVotadasEmPlenario')
 			.findOne({ano: ano})
 			.then(function(resultado){
@@ -198,35 +216,135 @@ exports.getMotionRollCallsInYear = function(db)
 					var tipo = arr[0];
 					var numero = arr[1];
 					var ano	= arr[2];
-					return obterUmaProposicao(tipo, numero, ano);
-				},{concurrency: 20})
+					return obterUmaProposicao(db, tipo, numero, ano);
+				},{concurrency: 1})
 					.then(function(){
-						console.log("Fim");
-						res.end("Fim");
+						console.log("Fim ano " + ano);
+						successfulYears.push(ano);
+						resolve();
 					})
 					.catch(function(err){
 						console.log('\x1b[31m%s\x1b[0m', 'Promise falhou: '+ err);
+						reject();
 					})
 			}).catch(function(err){
 				console.log("\x1b[31m%s\x1b[0m", "Erro: " + err + " Não foi possível carregar as proposicoes do o ano " + ano +"");
 			})
-	}
+		})
 }
 
-function obterUmaProposicao (tipo, numero, ano){
+function obterUmaProposicao (db, tipo, numero, ano){
 	var reqCamara = {
 		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
 		json: false,
+		agentOptions: {
+			socksHost: 'localhost', // Defaults to 'localhost'.
+			socksPort: 3000 // Defaults to 1080.
+		}
 	};
 
 	return rp(reqCamara)
 		.then(function(body){
-			console.log('Motion ' + tipo + ' ' + numero + ' ' + ano + " carregada com sucesso!")
+			salvarUmaProposição(db, body, tipo, numero, ano);
 		})
 		.catch(function(err){
-			console.log("\x1b[31m%s\x1b[0m", 'Não foi possível carregar a motion '+ tipo + ' ' + numero + ' ' + ano);
+			console.log("\x1b[31m%s\x1b[0m", 'Não foi possível carregar a motion '+ tipo + ' ' + numero + ' ' + ano + " erro: " + err);
 		})
 }
+
+function salvarUmaProposição(db, body, tipo, numero, ano)
+{
+	xml2js.parseString(body, (err, json) => {
+		if (err) console.log(err);
+		json.proposicao.tipo = json.proposicao.tipo.trim();
+		db.collection('obterProposicaoVerificador')
+			.updateOne({'proposicao.tipo':tipo,'proposicao.numero':numero,'proposicao.ano':ano}, 
+			{$set: json},
+			{upsert:true})
+			.then(() => {
+				console.log('Motion ' + tipo + ' ' + numero + ' ' + ano + " carregada com sucesso!")
+			}); 
+	})
+
+}
+
+function obterVotacoesProposicoesPorAno (db, ano)
+{
+	return new Promise ((resolve, reject) => {
+		db.collection('listarProposicoesVotadasEmPlenario')
+			.findOne({ano: ano})
+			.then(function(resultado){
+				console.log("Inicio");
+				var proposicoes = resultado.data.proposicoes.proposicao;
+				
+				Promise.map(proposicoes, function(prop){
+					var arr = prop.nomeProposicao.match(/\w+/g);
+					var tipo = arr[0];
+					var numero = arr[1];
+					var ano	= arr[2];
+					return obterUmaVotacaoProposicao(db, tipo, numero, ano);
+				},{concurrency: 1})
+					.then(function(){
+						console.log("Fim ano " + ano);
+						successfulYears.push(ano);
+						resolve();
+					})
+					.catch(function(err){
+						console.log('\x1b[31m%s\x1b[0m', 'Promise falhou: '+ err);
+						reject();
+					})
+			}).catch(function(err){
+				console.log("\x1b[31m%s\x1b[0m", "Erro: " + err + " Não foi possível carregar as votacoes do o ano " + ano +"");
+			})
+		})
+}
+
+function obterUmaVotacaoProposicao (db, tipo, numero, ano){
+	var reqCamara = {
+		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
+		json: false,
+		agentOptions: {
+			socksHost: 'localhost', // Defaults to 'localhost'.
+			socksPort: 3000 // Defaults to 1080.
+		}
+	};
+
+	return rp(reqCamara)
+		.then(function(body){
+			salvarUmaVotacaoProposição(db, body, tipo, numero, ano);
+		})
+		.catch(function(err){
+			console.log("\x1b[31m%s\x1b[0m", 'Não foi possível carregar a votacao motion '+ tipo + ' ' + numero + ' ' + ano + " erro: " + err);
+		})
+}
+
+function salvarUmaVotacaoProposição(db, body, tipo, numero, ano)
+{
+	xml2js.parseString(body, function(err,json){ 
+		// fix and add variables
+		json = fixFormatObterVotacaoProposicao(json);
+		// add the datetimeRollCallsMotion entry reference to the motion 
+		for (var i = 0; i < json.proposicao.Votacoes.Votacao.length; i++) {
+		  db.collection('datetimeRollCallsMotion')
+			.updateOne(
+				{'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}, //query
+				{$set: {'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}}, //insert/update
+				{upsert:true},                                                                                   // param
+				function(err, result){ if(err != null){console.log(err)} }                                      // callback
+			); 
+		  
+		};           
+
+		// add to the collection of motionRollCalls and return the json;
+		db.collection('obterVotacaoProposicao')
+		  .updateOne({'proposicao.Sigla':tipo,'proposicao.Numero':numero,'proposicao.Ano':ano},      //query
+				   {$set:json},                                                                          //insert/update
+				   {upsert:true},                                                                 // param
+				   function(err, result){  console.log((err === null) ? json : { msg: err })}  // callback
+		  ); 
+	})          
+}
+
 /*	request.get('http://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
 	{}, 
 	(err, result, body) => { 

@@ -31,13 +31,14 @@ MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	}
 
 	// functions to update DB... HTTP GET from camara.gov --------------------------------------
-	app.get('/getMotionRollCallsInYear/:ano', camara.getMotionRollCallsInYear(db));
+	app.get('/obterTodasProposicoes', camara.obterTodasProposicoes(db, years));
+	app.get('/obterTodasVotacoesProposicoes', camara.obterTodasVotacoesProposicoes(db, years));
 	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db, years));
-	app.get('/obterVotacaoProposicao/:tipo/:numero/:ano', camara.obterVotacaoProposicao(db));
-	app.get('/obterProposicao/:tipo/:numero/:ano', camara.obterProposicao(db));
+	app.get('/obterProposicao', camara.obterProposicao(db));
+	
 	
 	// CREATE SERVER :3000
-  	http.createServer(app).listen(app.get('port'), function(){
+  	app.listen(app.get('port'), function(){
 		console.log('Express server listening on port ' + app.get('port'));
 	});
 });
