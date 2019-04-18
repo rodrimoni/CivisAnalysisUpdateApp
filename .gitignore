@@ -40,6 +40,9 @@ build/Release
 node_modules/
 jspm_packages/
 
+#Downloaded data
+motions.min/
+
 # TypeScript v1 declaration files
 typings/
 

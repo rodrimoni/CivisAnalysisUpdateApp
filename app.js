@@ -34,7 +34,7 @@ MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	app.get('/obterTodasProposicoes', camara.obterTodasProposicoes(db, years));
 	app.get('/obterTodasVotacoesProposicoes', camara.obterTodasVotacoesProposicoes(db, years));
 	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db, years));
-	app.get('/obterProposicao', camara.obterProposicao(db));
+	app.get('/generateJsonFiles', camara.generateJsonFiles(db))
 	
 	
 	// CREATE SERVER :3000

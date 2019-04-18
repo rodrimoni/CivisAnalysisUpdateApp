@@ -11,7 +11,9 @@ xml2js.defaults['0.2'].mergeAttrs    = true;
 // ------------------------------------------
 
 var Promise = require('bluebird')
-var rp = require('request-promise');
+var rp = require('request-promise')
+var fs = require('fs')
+var levenshtein = require('fast-levenshtein');
 
 exports.obterDeputados = function(db){ 
 return function(req, res){
@@ -36,81 +38,6 @@ return function(req, res){
 			})
 		})
 	};	
-};
-
-
-//
-// INSERT in the new entries => datetime = new Date(year, month, day, hours, minutes, seconds, milliseconds);
-//http://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo=PL&numero=1992&ano=2007
-//
-exports.obterVotacaoProposicao = function(db){
-return function(req, res){
-	var ano = req.params.ano;
-	var tipo = req.params.tipo;
-	var numero = req.params.numero;
-	
-	request.get('http://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
-	{}, (err, result, body) => { 
-			if (err) {
-				console.error(error)
-				return
-			}
-			console.log(`statusCode: ${result.statusCode}`)
-
-			xml2js.parseString(body, function(err,json){ 
-				if (err) {
-					console.error(error)
-					return
-				}
-
-				// fix and add variables
-				json = fixFormatObterVotacaoProposicao(json);
-
-				// add the datetimeRollCallsMotion entry reference to the motion 
-				for (var i = 0; i < json.proposicao.Votacoes.Votacao.length; i++) {
-					db.collection('datetimeRollCallsMotion')
-					.update({'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}, //query
-							{'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}, //insert/update
-							{upsert:true},                                                                                   // param
-							function(err, result){ if(err != null){console.log(err)} }                                      // callback
-					); 
-					
-				};           
-
-				// add to the collection of motionRollCalls and return the json;
-				db.collection('obterVotacaoProposicao')
-					.update({'proposicao.Sigla':tipo,'proposicao.Numero':numero,'proposicao.Ano':ano},      //query
-							json,                                                                          //insert/update
-							{upsert:true},                                                                 // param
-							function(err, result){  res.json(  (err === null) ? json : { msg: err }  )  }  // callback
-					); 
-		})          
-	}) // requestify
-};  
-};
-  
-exports.obterProposicao = function(db){
-	return function(req, res){
-		var counts = {};
-		var ano = parseInt(req.params.ano);
-		db.collection('obterProposicaoVerificador')
-			.find()
-			.toArray()
-			.then(resultado => {
-				resultado.map(elem => {
-					db.collection('obterVotacaoProposicao').findOne({'proposicao.Sigla':elem.proposicao.tipo, 'proposicao.Numero':elem.proposicao.numero, 'proposicao.Ano':elem.proposicao.ano})
-					.then(votacao => {
-						if (votacao === null)
-							console.log(elem);
-						else
-							console.log("ok");
-					})	
-				})
-			})
-			.catch(error =>{
-				console.log(error);
-			})
-	};  
 };
 
 function fixFormatObterVotacaoProposicao(json){
@@ -197,6 +124,43 @@ exports.obterTodasVotacoesProposicoes = function(db, anos)
 		Promise.all(promises).then(function(results){
 			res.end("Proposicoes carregadas " + successfulYears);
 		});
+	}
+}
+
+exports.generateJsonFiles = function (db)
+{
+	return function (req, res) {
+		db.collection('obterProposicaoVerificador').find()
+		.toArray()
+		.then(motionsDetails => {
+			var promises = motionsDetails.map(function(motion,i)
+			{ 
+				motion = setMotion(motion.proposicao)
+				return db.collection('obterVotacaoProposicao').findOne({'proposicao.Sigla':motion.type,'proposicao.Numero':motion.number,'proposicao.Ano':motion.year})
+					.then(motionRollCalls => {
+						console.log((i*100/1254).toFixed(2) + "% complete setting roll call " + motion.type + motion.number + motion.year)
+						setRollCall(motion, motionRollCalls.proposicao)
+					})
+					.catch(err => {
+						console.log('Could not load DB votacao proposicao: ' + motion.type + " " + motion.number + " " + motion.year + " Erro: " + err)
+					}) 
+			})
+			Promise.all(promises).then( () => {
+				console.log("saving deputies");
+				saveDeputiesToFILE();
+				console.log("saving roll Calls array");
+				saveRollCallsArray();
+				console.log("saving motion files");
+				saveMotionsWithDelay();
+				res.end("fim")
+			})
+			.catch(error => {
+				console.log(error);
+			})
+		})
+		.catch(err => {
+			console.log('Could not load DB listAllMotions/ Erro: ' + err);
+		})
 	}
 }
 
@@ -345,29 +309,193 @@ function salvarUmaVotacaoProposição(db, body, tipo, numero, ano)
 	})          
 }
 
-/*	request.get('http://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
-	{}, 
-	(err, result, body) => { 
-		if (err) {
-			console.error(error)
-			return
-		}
-		console.log(`statusCode: ${result.statusCode}`)	
-		xml2js.parseString(body, function(err,json){ 
-				if (err) {
-					console.error(error)
-					return
-				}
-				//FIX the proposicao.tipo => sometimes with whitespaces++
-				//console.log(json.proposicao.tipo);
-				json.proposicao.tipo = json.proposicao.tipo.trim();
+var arrayMotions = [];
+var arrayDeputies  = [];
+var arrayRollCalls = [];
 
-				db.collection('obterProposicao')
-					.update({'proposicao.tipo':tipo,'proposicao.numero':numero,'proposicao.ano':ano}, json,{upsert:true}, function(err, result){
-					res.json(
-						(err === null) ? json : { msg: err }
-					);
-				});
-		})
+var motionsMAP	 = {};
+var motionsCount = -1;
+
+function setMotion(motion){
+	motion.tipo = motion.tipo.trim()
+	motion.numero = motion.numero.trim()
+	motion.ano = motion.ano.trim()
+	motion.name = motion.tipo+motion.numero+motion.ano;
+	if(motionsMAP[motion.name] === undefined){
+		var newMotion = {}
+		newMotion.type = motion.tipo;
+		newMotion.number = motion.numero;
+		newMotion.year = motion.ano;
+		newMotion.date = motion.DataApresentacao;
+		newMotion.author = motion.Autor;
+		newMotion.amendment = motion.Ementa;
+		newMotion.tags = motion.Indexacao;
+		newMotion.status = motion.Situacao;
+		newMotion.rollCalls = [];
+
+		motionsMAP[motion.name] = motionsCount++;
+		arrayMotions[motionsCount]= newMotion;
+
+		return newMotion;
+	}
+}
+
+
+function loadOldDeputies()
+{
+	var rawData = fs.readFileSync('deputies.json');  
+	arrayDeputies = JSON.parse(rawData);
+	arrayDeputies.map((elem ,i )=> {
+		deputiesNAMES[elem.name]= i;
+	})
+	phonebookIDcount = Object.keys(deputiesNAMES).length;
+}
+
+
+var deputiesNAMES = {};
+var phonebookIDcount = 0;
+function setDeputy(deputy){
+		deputy.district = deputy.UF.trim();
+		deputy.name    = deputy.Nome.trim().toUpperCase();
+		// correct misspelled 
+		if( dict[deputy.name] !== undefined) deputy.name = dict[deputy.name];
+
+		if(deputiesNAMES[deputy.name] === undefined) {
+
+			var newDeputy = {};
+			newDeputy.name = deputy.name;
+			newDeputy.district = deputy.district;
+
+			deputiesNAMES[newDeputy.name] = phonebookIDcount++; 
+			arrayDeputies.push(newDeputy);
+		}
+		return deputiesNAMES[deputy.name];
+}
+
+function setRollCall(motion, motionRollCalls){
+	if (motionRollCalls.Votacoes != null) {
+		if (motionRollCalls.Votacoes.Votacao != null) {
+			motionRollCalls.Votacoes.Votacao.forEach( function(votacao){
+				if (votacao.datetime.getFullYear() < 2019) // limit data until 2018
+				{
+					// datetimeRollCall - array of all rollCalls
+					var newDateTimeRollCall = {};
+					newDateTimeRollCall.type = motionRollCalls.Sigla.trim();
+					newDateTimeRollCall.year = motionRollCalls.Ano.trim();
+					newDateTimeRollCall.number = motionRollCalls.Numero.trim();
+					newDateTimeRollCall.datetime = votacao.datetime;
+					arrayRollCalls.push(newDateTimeRollCall);
+
+					// complete RollCall Object - inserted on the motion
+					var newRollCall = {}
+					newRollCall.datetime = votacao.datetime;
+					newRollCall.obj = votacao.ObjVotacao ;
+					newRollCall.summary = votacao.Resumo ;
+
+					newRollCall.votes = [];
+					//console.log(newRollCall)
+
+					if(votacao.votos != undefined){
+						votacao.votos.Deputado.forEach(function(deputado){
+							if (votoToInteger[deputado.Voto.trim()] !== undefined)
+							{
+								var deputyID = setDeputy(deputado);
+								var vote = {};
+								vote.deputyID = deputyID;
+								vote.vote     = votoToInteger[deputado.Voto.trim()];
+								vote.party    = deputado.Partido.trim();
+								newRollCall.votes.push(vote)
+							}
+						})
+					}
+					motion.rollCalls.push(newRollCall);
+				} 
+			})
+
+		};
+	};
+}
+
+var votoToInteger = {"Sim":0,"Não":1,"Abstenção":2,"Obstrução":3,"Art. 17":4,"Branco":5};
+
+// call the callback and wait millis to return 
+function sleep(millis, callback){
+	setTimeout(
+		function (){ callback() }
+		, millis
+	);
+}
+
+const util = require('util')
+
+// for an given array, save each entry using the filename - getName(entry)
+// is set to wait one second to save each item ( sleep(1000) )
+function saveEntriesOfArray( array, getName){
+	array.map((elem) => {
+		console.log("writing the motion: " + getName(elem))
+		var json = JSON.stringify(elem)
+		fs.writeFileSync('./motions.min/' + getName(elem) + '.json', json, 'utf8');
+	})
+}
+
+function saveMotionsWithDelay(){
+	saveEntriesOfArray(arrayMotions, function(motion){ return motion.type + motion.number + motion.year; }, 0)
+}
+function saveDeputiesToFILE()
+{
+	var json = JSON.stringify(arrayDeputies);
+	fs.writeFileSync('deputies.json', json, 'utf8');
+}
+function saveRollCallsArray(){
+	arrayRollCalls.forEach( function (d) {
+		d.datetime = new Date( d.datetime )
 	});
-};  */
+
+	arrayRollCalls.sort(function(a,b){
+		// Turn your strings into dates, and then subtract them
+		// to get a value that is either negative, positive, or zero.
+		return a.datetime - b.datetime;
+	});
+	var json = JSON.stringify(arrayRollCalls);
+	fs.writeFileSync('arrayRollCalls.json', json, 'utf8');
+}
+
+var dict= { // found with Levenshtein Distance levDist() - misspelling deputies names
+	'ANDRE VARGAS':'ANDRÉ VARGAS',
+	'JOSE STÉDILE':'JOSÉ STÉDILE', 
+	'DUDIMAR PAXIUBA':'DUDIMAR PAXIÚBA', 
+	'MARCIO REINALDO MOREIRA':'MÁRCIO REINALDO MOREIRA', 
+	'FELIX MENDONÇA JÚNIOR':'FÉLIX MENDONÇA JÚNIOR', 
+	'FABIO TRAD':'FÁBIO TRAD', 
+	'JOÃO PAULO  LIMA':'JOÃO PAULO LIMA', 
+	'JERONIMO GOERGEN':'JERÔNIMO GOERGEN', 
+	'JAIRO ATAIDE':'JAIRO ATAÍDE',
+	'OSMAR  TERRA':'OSMAR TERRA', 
+	'MARCIO MARINHO':'MÁRCIO MARINHO',
+	'LAERCIO OLIVEIRA':'LAÉRCIO OLIVEIRA',
+	'EMILIA FERNANDES':'EMÍLIA FERNANDES',
+	'SIBA MACHADO':'SIBÁ MACHADO', 
+	'JOAO ANANIAS':'JOÃO ANANIAS',
+	'PADRE JOAO':'PADRE JOÃO',
+	'JOSE HUMBERTO':'JOSÉ HUMBERTO',
+	'ROGERIO CARVALHO':'ROGÉRIO CARVALHO',
+	'JOSÉ  C. STANGARLINI':'JOSÉ C. STANGARLINI',
+	'JOSÉ C STANGARLINI':'JOSÉ C. STANGARLINI', 
+	'MANUELA DÁVILA':'MANUELA D`ÁVILA', 
+	'CHICO DANGELO':'CHICO D`ANGELO', 
+	'VANESSA  GRAZZIOTIN':'VANESSA GRAZZIOTIN', 
+	'FRANCISCO TENORIO':'FRANCISCO TENÓRIO', 
+	'CLAUDIO DIAZ':'CLÁUDIO DIAZ',
+	'DR. PAULO CESAR':'DR. PAULO CÉSAR', 
+	'ANDRE ZACHAROW':'ANDRÉ ZACHAROW',
+	'ISAIAS SILVESTRE':'ISAÍAS SILVESTRE', 
+	'LEO ALCÂNTARA':'LÉO ALCÂNTARA', 
+	'CARLOS  MELLES':'CARLOS MELLES', 
+	'DAVI ALVES SILVA JUNIOR':'DAVI ALVES SILVA JÚNIOR', 
+	'WELINTON FAGUNDES':'WELLINGTON FAGUNDES',
+	'WELLINTON FAGUNDES':'WELLINGTON FAGUNDES',
+	'SERGIO CAIADO':'SÉRGIO CAIADO', 
+	'TARCISIO ZIMMERMANN':'TARCÍSIO ZIMMERMANN',
+	'CLAUDIO RORATO':'CLÁUDIO RORATO', 
+	'MARCIO BITTAR':'MÁRCIO BITTAR', 
+}
