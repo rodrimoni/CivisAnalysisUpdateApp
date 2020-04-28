@@ -7,6 +7,7 @@
         {
             "type": "node",
             "request": "launch",
+            "runtimeArgs": ["--max-old-space-size=4096"],
             "name": "Launch Program",
             "program": "${workspaceFolder}\\app.js"
         }

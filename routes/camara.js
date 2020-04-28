@@ -18,7 +18,7 @@ xml2js.defaults['0.2'].mergeAttrs    = true;
 var Promise = require('bluebird')
 var rp = require('request-promise')
 var fs = require('fs')
-var levenshtein = require('fast-levenshtein');
+//var levenshtein = require('fast-levenshtein');
 
 exports.obterDeputados = function(db){ 
 return function(req, res){
@@ -50,7 +50,7 @@ function fixFormatObterVotacaoProposicao(json){
 	json.proposicao.Sigla = json.proposicao.Sigla.trim(); 
   
 	// fix the object/array to array
-	if(!isArray(json.proposicao.Votacoes.Votacao)){
+	if(!Array.isArray(json.proposicao.Votacoes.Votacao)){
 	  json.proposicao.Votacoes.Votacao = [ json.proposicao.Votacoes.Votacao ];
 	}
   
@@ -108,26 +108,14 @@ function listarProposicoesVotadasEmPlenario (db, ano){
 
 exports.obterTodasProposicoes = function(db, anos)
 {
-	return function(req, res) { /*
+	return function(req, res) { 
 		var promises = anos.map(function (ano){
 			return obterProposicoesPorAno(db, ano);
 		})
 
 		Promise.all(promises).then(function(results){
 			res.end("Proposicoes carregadas " + successfulYears);
-		});*/
-		db.collection('obterVotacaoProposicao').find()
-			.toArray()
-			.then(result => {
-				console.log(result.length);
-			})
-		
-			/*db.collection('obterProposicaoVerificador').aggregate(
-			{"$group" : { "_id": {'tipo':"$proposicao.tipo", 'ano':"$proposicao.ano"}, "count": { "$sum": 1 } } },
-			{"$match": {"_id" :{ "$ne" : null } , "count" : {"$gt": 1} } }, 
-			{"$project": {"name" : "$_id", "_id" : 0} }
-		).toArray()
-			.then(res => {console.log(res);})*/
+		});
 	}
 }
 
@@ -284,14 +272,14 @@ function obterVotacoesProposicoesPorAno (db, ano)
 
 function obterUmaVotacaoProposicao (db, tipo, numero, ano){
 	var reqCamara = {
-		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
-		json: false,
+		uri: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
 		headers: {
 			'User-Agent': 'Request-Promise',
 			'Host': 'www.camara.leg.br',
 			'Content-Type': 'Content-Type: text/xml; charset=utf-8',
 			'Connection': 'keep-alive'
 		},
+		json: false
 	};
 
 	return rp(reqCamara)
@@ -397,7 +385,7 @@ function setRollCall(motion, motionRollCalls){
 	if (motionRollCalls.Votacoes != null) {
 		if (motionRollCalls.Votacoes.Votacao != null) {
 			motionRollCalls.Votacoes.Votacao.forEach( function(votacao){
-				if (votacao.datetime.getFullYear() < 2020) // limit data until 2018
+				if (votacao.datetime.getFullYear() < 2021)
 				{
 					// datetimeRollCall - array of all rollCalls
 					var newDateTimeRollCall = {};
