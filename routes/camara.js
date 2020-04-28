@@ -2,6 +2,11 @@
 /*
 * GET camara resources and save to DB
 * NOTE: this functions will make a GET to camara.gov and update the mongo db.
+*
+* Run "Carregar todas proposições votadas"
+* Run "Obter todas proposições"
+* Run "Obter todas votações proposições"
+* Run "Obter arquivos JSON"
 */
 
 // XML -> JSON parser -----------------------
@@ -103,14 +108,26 @@ function listarProposicoesVotadasEmPlenario (db, ano){
 
 exports.obterTodasProposicoes = function(db, anos)
 {
-	return function(req, res) {
+	return function(req, res) { /*
 		var promises = anos.map(function (ano){
 			return obterProposicoesPorAno(db, ano);
 		})
 
 		Promise.all(promises).then(function(results){
 			res.end("Proposicoes carregadas " + successfulYears);
-		});
+		});*/
+		db.collection('obterVotacaoProposicao').find()
+			.toArray()
+			.then(result => {
+				console.log(result.length);
+			})
+		
+			/*db.collection('obterProposicaoVerificador').aggregate(
+			{"$group" : { "_id": {'tipo':"$proposicao.tipo", 'ano':"$proposicao.ano"}, "count": { "$sum": 1 } } },
+			{"$match": {"_id" :{ "$ne" : null } , "count" : {"$gt": 1} } }, 
+			{"$project": {"name" : "$_id", "_id" : 0} }
+		).toArray()
+			.then(res => {console.log(res);})*/
 	}
 }
 
@@ -138,7 +155,7 @@ exports.generateJsonFiles = function (db)
 				motion = setMotion(motion.proposicao)
 				return db.collection('obterVotacaoProposicao').findOne({'proposicao.Sigla':motion.type,'proposicao.Numero':motion.number,'proposicao.Ano':motion.year})
 					.then(motionRollCalls => {
-						console.log((i*100/1254).toFixed(2) + "% complete setting roll call " + motion.type + motion.number + motion.year)
+						console.log((i*100/1283).toFixed(2) + "% complete setting roll call " + motion.type + motion.number + motion.year)
 						setRollCall(motion, motionRollCalls.proposicao)
 					})
 					.catch(err => {
@@ -199,12 +216,14 @@ function obterProposicoesPorAno (db, ano)
 
 function obterUmaProposicao (db, tipo, numero, ano){
 	var reqCamara = {
-		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
-		json: false,
-		agentOptions: {
-			socksHost: 'localhost', // Defaults to 'localhost'.
-			socksPort: 3000 // Defaults to 1080.
-		}
+		uri: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
+		headers: {
+			'User-Agent': 'Request-Promise',
+			'Host': 'www.camara.leg.br',
+			'Content-Type': 'Content-Type: text/xml; charset=utf-8',
+			'Connection': 'keep-alive'
+		},
+		json: false // Automatically parses the JSON string in the response
 	};
 
 	return rp(reqCamara)
@@ -267,10 +286,12 @@ function obterUmaVotacaoProposicao (db, tipo, numero, ano){
 	var reqCamara = {
 		url: 'https://www.camara.leg.br/SitCamaraWS/Proposicoes.asmx/ObterVotacaoProposicao?tipo='+tipo+'&numero='+numero+'&ano='+ano,
 		json: false,
-		agentOptions: {
-			socksHost: 'localhost', // Defaults to 'localhost'.
-			socksPort: 3000 // Defaults to 1080.
-		}
+		headers: {
+			'User-Agent': 'Request-Promise',
+			'Host': 'www.camara.leg.br',
+			'Content-Type': 'Content-Type: text/xml; charset=utf-8',
+			'Connection': 'keep-alive'
+		},
 	};
 
 	return rp(reqCamara)
@@ -304,7 +325,7 @@ function salvarUmaVotacaoProposição(db, body, tipo, numero, ano)
 		  .updateOne({'proposicao.Sigla':tipo,'proposicao.Numero':numero,'proposicao.Ano':ano},      //query
 				   {$set:json},                                                                          //insert/update
 				   {upsert:true},                                                                 // param
-				   function(err, result){  console.log((err === null) ? json : { msg: err })}  // callback
+				   function(err, result){if (err !== null) console.log({ msg: err })}  // callback
 		  ); 
 	})          
 }
@@ -376,7 +397,7 @@ function setRollCall(motion, motionRollCalls){
 	if (motionRollCalls.Votacoes != null) {
 		if (motionRollCalls.Votacoes.Votacao != null) {
 			motionRollCalls.Votacoes.Votacao.forEach( function(votacao){
-				if (votacao.datetime.getFullYear() < 2019) // limit data until 2018
+				if (votacao.datetime.getFullYear() < 2020) // limit data until 2018
 				{
 					// datetimeRollCall - array of all rollCalls
 					var newDateTimeRollCall = {};
