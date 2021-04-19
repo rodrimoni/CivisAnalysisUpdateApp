@@ -297,24 +297,30 @@ function salvarUmaVotacaoProposição(db, body, tipo, numero, ano)
 		// fix and add variables
 		json = fixFormatObterVotacaoProposicao(json);
 		// add the datetimeRollCallsMotion entry reference to the motion 
-		for (var i = 0; i < json.proposicao.Votacoes.Votacao.length; i++) {
+		/*for (var i = 0; i < json.proposicao.Votacoes.Votacao.length; i++) {
 		  db.collection('datetimeRollCallsMotion')
 			.updateOne(
 				{'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}, //query
 				{$set: {'datetime':json.proposicao.Votacoes.Votacao[i].datetime,'tipo':tipo,'numero':numero,'ano':ano}}, //insert/update
-				{upsert:true},                                                                                   // param
-				function(err, result){ if(err != null){console.log(err)} }                                      // callback
-			); 
-		  
-		};           
+				{upsert:true}                                                                             // param
+			)
+			.then(() => {
+				console.log('Votacao ' + tipo + ' ' + numero + ' ' + ano + " carregada com sucesso!")
+			}); 		  
+		};      */
 
 		// add to the collection of motionRollCalls and return the json;
 		db.collection('obterVotacaoProposicao')
 		  .updateOne({'proposicao.Sigla':tipo,'proposicao.Numero':numero,'proposicao.Ano':ano},      //query
 				   {$set:json},                                                                          //insert/update
 				   {upsert:true},                                                                 // param
-				   function(err, result){if (err !== null) console.log({ msg: err })}  // callback
-		  ); 
+				   function(err, result){
+						if (err !== null) 
+							console.log({ msg: err })
+						else
+							console.log('Votacao ' + tipo + ' ' + numero + ' ' + ano + " carregada com sucesso!");
+					}
+		  )
 	})          
 }
 

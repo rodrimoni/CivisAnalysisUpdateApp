@@ -8,11 +8,11 @@ var path = require('path');
 
 var app = express();
 var db;
-const begin = 1991;
+const begin = 2011;
 const end = 2020;
 
 const MongoClient = require('mongodb').MongoClient;
-const uri = "mongodb+srv://admin:admin@civisanalysisdb-rgysv.mongodb.net/test?retryWrites=true";
+const uri = "mongodb+srv://admin:admin@civisanalysisdb-rgysv.mongodb.net/test?retryWrites=true&w=majority";
 
 // all environments
 app.set('port', process.env.PORT || 3000);
