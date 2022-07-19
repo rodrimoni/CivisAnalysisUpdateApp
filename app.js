@@ -3,13 +3,13 @@
 var express = require('express');
 var camara = require('./routes/camara');
 //var camaraClient = require('./routes/camaraClient');
-var http = require('http');
 var path = require('path');
 
 var app = express();
 var db;
-const begin = 2011;
-const end = 2020;
+// Não carregar todos anos de só uma vez, o sistema da câmara vai bloquear.
+const begin = 1991;
+const end = 2021;
 
 const MongoClient = require('mongodb').MongoClient;
 const uri = "mongodb+srv://admin:admin@civisanalysisdb-rgysv.mongodb.net/test?retryWrites=true&w=majority";
@@ -34,7 +34,7 @@ MongoClient.connect(uri, { useNewUrlParser: true }, (err, client) => {
 	app.get('/obterTodasProposicoes', camara.obterTodasProposicoes(db, years));
 	app.get('/obterTodasVotacoesProposicoes', camara.obterTodasVotacoesProposicoes(db, years));
 	app.get('/listarTodasProposicoesVotadasEmPlenario', camara.listarTodasProposicoesVotadasEmPlenario(db, years));
-	app.get('/generateJsonFiles', camara.generateJsonFiles(db))
+	//app.get('/generateJsonFiles', camara.generateJsonFiles(db))
 	
 	
 	// CREATE SERVER :3000
