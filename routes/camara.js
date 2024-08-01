@@ -165,6 +165,36 @@ exports.generateJsonFiles = function (db) {
 	}
 }
 
+exports.adicionarTemasParaProposicoes = function (db, themes) {
+	return async (req, res) => {
+        try {
+            const collection = db.collection('obterProposicaoVerificador'); // Replace 'proposicoes' with the actual collection name
+
+            // Iterate over the themes array
+            for (const theme of themes) {
+                const { tipo, numero, ano, temaPredito } = theme;
+
+                // Update the document in the collection by adding the 'temaPredito' field
+                const result = await collection.updateOne(
+					{ "proposicao.tipo": tipo, "proposicao.numero": numero, "proposicao.ano": ano }, // Find the document by idProposicao
+                    { $set: { "proposicao.temaPredito": temaPredito } } // Add the 'temaPredito' field
+                );
+
+                if (result.matchedCount === 0) {
+                    console.log(`No document found with idProposicao: ${tipo}-${numero}-${ano}`);
+                } else {
+                    console.log(`Updated document with idProposicao: ${tipo}-${numero}-${ano}`);
+                }
+            }
+
+            res.status(200).send('Themes added to motions successfully');
+        } catch (err) {
+            console.error('Error updating motions with themes:', err);
+            res.status(500).send('An error occurred while adding themes to motions');
+        }
+    };
+}
+
 var successfulYears = [];
 
 function obterProposicoesPorAno(db, ano) {
@@ -338,6 +368,7 @@ function setMotion(motion) {
 		newMotion.amendment = motion.Ementa;
 		newMotion.tags = motion.Indexacao;
 		newMotion.status = motion.Situacao;
+		newMotion.theme = motion?.temaPredito
 		newMotion.rollCalls = [];
 
 		motionsMAP[motion.name] = motionsCount++;
