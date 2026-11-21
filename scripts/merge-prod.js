@@ -49,9 +49,21 @@ for (const d of [...freshDeputies].sort((a, b) => a.deputyID - b.deputyID)) {
 const freshToFinal = new Map(freshDeputies.map(d => [d.deputyID, idByName.get(d.name)]));
 
 // --- motions: renumber fresh votes; keep production-only motions ------------
+// The API does not return votes (or orientation keys) in a stable order. A roll
+// call whose content equals the published one keeps production's object, so the
+// diff shows only real changes instead of millions of reordered lines.
+const sortKeys = o => (o && typeof o === 'object' && !Array.isArray(o))
+  ? Object.fromEntries(Object.keys(o).sort().map(k => [k, sortKeys(o[k])])) : o;
+const contentKey = rc => JSON.stringify(sortKeys({
+  ...rc, votes: [...(rc.votes || [])].sort((a, b) => a.deputyID - b.deputyID).map(sortKeys)
+}));
+
+const prodMotions = await readMotions(path.join(prodData, 'motions.min'));
+const prodByFile = new Map(prodMotions.map(m => [m.file, m.motion]));
+
 const fresh = await readMotions(config.paths.motionsDir);
 const freshFiles = new Set(fresh.map(m => m.file));
-let remapped = 0;
+let remapped = 0, reusedRollCalls = 0, changedRollCalls = 0;
 for (const { file, motion } of fresh) {
   for (const rc of motion.rollCalls || []) {
     for (const vote of rc.votes || []) {
@@ -61,10 +73,25 @@ for (const { file, motion } of fresh) {
       vote.deputyID = id;
     }
   }
+
+  const published = prodByFile.get(file);
+  if (published) {
+    const pool = new Map();
+    for (const rc of published.rollCalls || []) {
+      const k = contentKey(rc);
+      pool.set(k, [...(pool.get(k) || []), rc]);
+    }
+    motion.rollCalls = (motion.rollCalls || []).map(rc => {
+      const same = pool.get(contentKey(rc));
+      if (same && same.length) { reusedRollCalls++; return same.shift(); }
+      changedRollCalls++;
+      return rc;
+    });
+  }
   await writeJson(path.join(config.paths.motionsDir, file), motion);
 }
 
-const kept = (await readMotions(path.join(prodData, 'motions.min'))).filter(m => !freshFiles.has(m.file));
+const kept = prodMotions.filter(m => !freshFiles.has(m.file));
 for (const { file, motion } of kept) {
   await writeJson(path.join(config.paths.motionsDir, file), motion);
 }
@@ -87,6 +114,7 @@ await writeJson(config.paths.rollCallsFile, rollCalls);
 console.log(`Deputados: ${prodDeputies.length} de produção (IDs mantidos) + ${appended.length} novos`);
 appended.forEach(d => console.log(`  + #${d.deputyID} ${d.name} (${d.district})`));
 console.log(`Votos renumerados para os IDs de produção: ${remapped}`);
+console.log(`Votações de proposições já publicadas: ${reusedRollCalls} idênticas (mantida a cópia de produção), ${changedRollCalls} novas ou alteradas`);
 console.log(`Proposições que a API não devolveu mais, mantidas de produção: ${kept.length}`);
 kept.forEach(({ file, motion }) => console.log(`  = ${file} (${motion.rollCalls.length} votações)`));
 console.log(`arrayRollCalls.json: ${rollCalls.length} (${keptRollCalls.length} vindas de produção)`);
