@@ -228,10 +228,12 @@ byte a byte, exceto o `generatedAt` do `data/bundles/manifest.json`. Toda
 diferença no `git diff` vem, portanto, dos dados novos. O passo leva cerca de
 20 minutos, quase todos no W-NOMINATE.
 
-`npm test` encadeia os testes com `&&` e para no primeiro que falha. Desde
-nov/2026, o `verify-derived-layers.js` já falha na `main` (2 checks do force
-layout no jsdom), sem relação com os dados. Para ver todos os resultados, rode
-cada `scripts/verify-*.js` separadamente.
+`npm test` encadeia os testes com `&&` e para no primeiro que falha. O
+`verify-derived-layers.js` é **intermitente**: depende do tempo da simulação do
+force layout no jsdom. Em nov/2026, ele falhou uma vez na `main` sem nenhuma
+mudança e passou em 4 de 4 execuções com os dados novos. Se falhar, rode de
+novo antes de suspeitar dos dados. Para ver todos os resultados, rode cada
+`scripts/verify-*.js` separadamente.
 
 Os geradores descobrem o último ano sozinhos, a partir de `arrayRollCalls.json`
 (`scripts/ending-year.js`). **O app não descobre.** Confira
@@ -268,6 +270,7 @@ No fim, atualize a linha "Última atualização" no topo deste documento.
 - [ ] `npm run freeze-themes` e depois `npm run check-themes` com ✓
 - [ ] `npm run compare-prod` com ✓
 - [ ] Três arquivos copiados juntos para `CivisAnalysis2/data/`
-- [ ] `generate-all.js` + testes (só a falha conhecida do `verify-derived-layers`)
+- [ ] `generate-all.js` + testes passando (o `verify-derived-layers` pode precisar de nova execução)
+- [ ] `git diff` dos derivados restrito aos anos/períodos com dados novos
 - [ ] Site conferido com `npm run dev` antes do merge na `main`, que faz o deploy
 - [ ] `congress-definitions.js` em dia (ano, legislatura, presidente)
