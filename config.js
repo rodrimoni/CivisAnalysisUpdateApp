@@ -8,7 +8,8 @@ const __dirname = path.dirname(__filename);
 export default {
     years: {
         begin: parseInt(process.env.YEAR_BEGIN || '1991'),
-        end: parseInt(process.env.YEAR_END || '2025')
+        // Defaults to the current year: a fixed default silently drops every newer year.
+        end: parseInt(process.env.YEAR_END || String(new Date().getFullYear()))
     },
     paths: {
         themesFile: path.join(__dirname, 'proposicoes_temas.json'),
