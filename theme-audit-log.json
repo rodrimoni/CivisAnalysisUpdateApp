@@ -317,5 +317,41 @@
     "classifier": "claude-opus-5 (sessão Claude Code)",
     "source": "ementa",
     "rationale": "marco legal do transporte público coletivo urbano"
+  },
+  {
+    "file": "PLN232026.json",
+    "amendment": "Abre ao Orçamento da Seguridade Social da União, em favor do Ministérios da Previdência Social e do Desenvolvimento e Assistência Social, Família e Combate à Fome, crédito suplementar no valor de R$ 185.555.629.364,00.",
+    "tags": "",
+    "previousTheme": "NO THEME",
+    "newTheme": "Finanças Públicas e Orçamento",
+    "action": "classified",
+    "classifier": "claude-opus-5-5 (sessão Claude Code)",
+    "source": "ementa",
+    "rationale": "crédito suplementar ao Orçamento da Seguridade Social; segue os demais PLN de crédito do dataset",
+    "timestamp": "2026-11-21T20:33:21.499Z"
+  },
+  {
+    "file": "PLN252026.json",
+    "amendment": "Abre ao Orçamento de Investimento da União, em favor da Eletronuclear S.A., crédito suplementar no valor de R$ 290.058.339,00, para reforço de dotação orçamentária constante da Lei Orçamentária vigente.",
+    "tags": "",
+    "previousTheme": "NO THEME",
+    "newTheme": "Finanças Públicas e Orçamento",
+    "action": "classified",
+    "classifier": "claude-opus-5-5 (sessão Claude Code)",
+    "source": "ementa",
+    "rationale": "crédito suplementar ao Orçamento de Investimento (Eletronuclear); segue os demais PLN de crédito do dataset",
+    "timestamp": "2026-11-21T20:33:21.499Z"
+  },
+  {
+    "file": "REQ40632026.json",
+    "amendment": "Requer a urgência para a apreciação do PL n.º 4.921/2026, que dispõe sobre a transformação de cargos vagos no quadro permanente do Tribunal Regional do Trabalho da 18ª Região, sem aumento de despesas.",
+    "tags": "",
+    "previousTheme": "NO THEME",
+    "newTheme": "Administração Pública",
+    "action": "classified",
+    "classifier": "claude-opus-5-5 (sessão Claude Code)",
+    "source": "ementa",
+    "rationale": "urgência para o PL 4.921/2026 (fora do dataset), transformação de cargos vagos do TRT-18; mesmo tema dos PL 1694/2025 e PL 3292/2025, de ementa idêntica para outros TRTs",
+    "timestamp": "2026-11-21T20:33:21.499Z"
   }
 ]

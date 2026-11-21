@@ -52696,5 +52696,482 @@
     "Ementa": "Urgência, para o Projeto de Lei nº. 3278 de 2021, que institui o marco legal do transporte público coletivo urbano e altera a Lei nº 10.257, de 10 de julho de 2001 (Estatuto da Cidade), a Lei nº 10.336, de 19 de dezembro de 2001, a Lei nº 10.636, de 30 de dezembro de 2002, e a Lei nº 12.587, de 3 de janeiro de 2012 (Lei de Mobilidade Urbana).",
     "_classificadoPor": "claude-opus-5 (sessão Claude Code, 2026-08-14)",
     "_fonte": "ementa"
+  },
+  {
+    "tipo": "MPV",
+    "numero": "1313",
+    "ano": "2025",
+    "temaPredito": [
+      "Direitos Humanos e Minorias"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "MPV",
+    "numero": "1317",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "MPV",
+    "numero": "1323",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "MPV",
+    "numero": "1343",
+    "ano": "2026",
+    "temaPredito": [
+      "Trabalho e Emprego"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PDL",
+    "numero": "50",
+    "ano": "2026",
+    "temaPredito": [
+      "Meio Ambiente e Desenvolvimento Sustentável"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PDL",
+    "numero": "995",
+    "ano": "2026",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PEC",
+    "numero": "18",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PEC",
+    "numero": "221",
+    "ano": "2019",
+    "temaPredito": [
+      "Direito Constitucional"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PEC",
+    "numero": "383",
+    "ano": "2017",
+    "temaPredito": [
+      "Previdência e Assistência Social"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PEC",
+    "numero": "5",
+    "ano": "2023",
+    "temaPredito": [
+      "Arte, Cultura e Religião"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "1069",
+    "ano": "2025",
+    "temaPredito": [
+      "Direitos Humanos e Minorias"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "1625",
+    "ano": "2026",
+    "temaPredito": [
+      "Direito Civil e Processual Civil"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "1769",
+    "ano": "2019",
+    "temaPredito": [
+      "Agricultura, Pecuária, Pesca e Extrativismo"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "1822",
+    "ano": "2024",
+    "temaPredito": [
+      "Previdência e Assistência Social"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "2780",
+    "ano": "2024",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "278",
+    "ano": "2026",
+    "temaPredito": [
+      "Cidades e Desenvolvimento Urbano"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "2942",
+    "ano": "2024",
+    "temaPredito": [
+      "Direito e Justiça"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "3025",
+    "ano": "2023",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "3085",
+    "ano": "2026",
+    "temaPredito": [
+      "Direito e Justiça"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "3879",
+    "ano": "2024",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "3880",
+    "ano": "2024",
+    "temaPredito": [
+      "Defesa e Segurança"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "4133",
+    "ano": "2023",
+    "temaPredito": [
+      "Ciência, Tecnologia e Inovação"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "424",
+    "ano": "2015",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "4397",
+    "ano": "2024",
+    "temaPredito": [
+      "Direito Civil e Processual Civil"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "4709",
+    "ano": "2025",
+    "temaPredito": [
+      "Comunicações"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "488",
+    "ano": "2019",
+    "temaPredito": [
+      "Direito Penal e Processual Penal"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "533",
+    "ano": "2024",
+    "temaPredito": [
+      "Arte, Cultura e Religião"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "5490",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "55",
+    "ano": "2026",
+    "temaPredito": [
+      "Direito e Defesa do Consumidor"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "5900",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6133",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6139",
+    "ano": "2023",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6240",
+    "ano": "2013",
+    "temaPredito": [
+      "Direito Penal e Processual Penal"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6359",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6415",
+    "ano": "2025",
+    "temaPredito": [
+      "Direito e Justiça"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "6461",
+    "ano": "2019",
+    "temaPredito": [
+      "Trabalho e Emprego"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PL",
+    "numero": "727",
+    "ano": "2026",
+    "temaPredito": [
+      "Defesa e Segurança"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLN",
+    "numero": "23",
+    "ano": "2026",
+    "temaPredito": [
+      "Finanças Públicas e Orçamento"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLN",
+    "numero": "25",
+    "ano": "2026",
+    "temaPredito": [
+      "Finanças Públicas e Orçamento"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "109",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "114",
+    "ano": "2026",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "14",
+    "ano": "2026",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "186",
+    "ano": "2026",
+    "temaPredito": [
+      "Agricultura, Pecuária, Pesca e Extrativismo"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "21",
+    "ano": "2026",
+    "temaPredito": [
+      "Esporte e Lazer"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "230",
+    "ano": "2025",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "262",
+    "ano": "2019",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "281",
+    "ano": "2019",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "337",
+    "ano": "2017",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "41",
+    "ano": "2026",
+    "temaPredito": [
+      "Defesa e Segurança"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "6",
+    "ano": "2024",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "74",
+    "ano": "2026",
+    "temaPredito": [
+      "Finanças Públicas e Orçamento"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "PLP",
+    "numero": "80",
+    "ano": "2026",
+    "temaPredito": [
+      "Economia"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
+  },
+  {
+    "tipo": "REQ",
+    "numero": "4063",
+    "ano": "2026",
+    "temaPredito": [
+      "Administração Pública"
+    ],
+    "_congeladoDe": "CivisAnalysisUpdateApp/motions.min"
   }
 ]
