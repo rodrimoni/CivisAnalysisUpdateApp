@@ -126,9 +126,10 @@ async function main() {
 
     await Promise.all([...narrowTasks, ...classifyTasks]);
 
-    // Write audit log
+    // Append to the audit log: earlier runs' provenance must survive this one.
     const auditPath = path.join(path.dirname(motionsDir), 'theme-audit-log.json');
-    fs.writeFileSync(auditPath, JSON.stringify(auditLog, null, 2));
+    const previousLog = fs.existsSync(auditPath) ? JSON.parse(fs.readFileSync(auditPath, 'utf-8')) : [];
+    fs.writeFileSync(auditPath, JSON.stringify([...previousLog, ...auditLog], null, 2));
 
     console.log(`\nDone! Processed: ${processed}, Errors: ${errors}`);
     console.log(`Audit log: ${auditPath}`);

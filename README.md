@@ -2,6 +2,8 @@
 
 A modern CLI tool for incrementally fetching data from the Brazilian Chamber of Deputies (Câmara dos Deputados) public API. All data is processed **in memory** - no database required!
 
+> **Atualizando os dados de produção?** Siga [docs/ATUALIZACAO-DE-DADOS.md](docs/ATUALIZACAO-DE-DADOS.md). A saída bruta do fetch **não** pode ir direto para produção: o `merge-prod` mantém os IDs e o que a API perdeu, e o `compare-prod` barra qualquer regressão.
+
 ## Overview
 
 This application fetches and processes data about legislative propositions, votes, and deputies from the Camara.gov.br API. It processes everything in memory and generates JSON files for further analysis.
@@ -34,7 +36,7 @@ npm install
 3. (Optional) Create a `.env` file to customize settings:
 ```bash
 YEAR_BEGIN=1991
-YEAR_END=2025
+YEAR_END=2026
 API_CONCURRENCY=1
 ```
 
@@ -65,7 +67,7 @@ This will:
 Edit `.env` file or `config.js` to customize:
 
 - **YEAR_BEGIN**: Starting year (default: 1991)
-- **YEAR_END**: Ending year (default: 2025)
+- **YEAR_END**: Ending year (default: current year)
 - **API_CONCURRENCY**: Number of concurrent API requests (default: 1)
 
 ## Project Structure
@@ -78,7 +80,13 @@ Edit `.env` file or `config.js` to customize:
 │   ├── data-processors.js   # Data processing utilities
 │   └── motion-processor.js  # Motion processing logic
 ├── scripts/
-│   └── fetch-all-data.js    # Main script (does everything!)
+│   ├── fetch-all-data.js    # Main script: full rebuild from the API
+│   ├── merge-prod.js        # Keeps production deputyIDs + motions the API dropped
+│   ├── check-themes.js      # Lists NO THEME / unfrozen themes
+│   ├── classify-themes.js   # LLM classification of NO THEME motions
+│   ├── freeze-themes.js     # Appends new themes to proposicoes_temas.json
+│   └── compare-prod.js      # Fails if anything published would change
+├── docs/ATUALIZACAO-DE-DADOS.md  # Update runbook
 ├── proposicoes_temas.json   # Themes data
 └── package.json
 ```
@@ -102,7 +110,7 @@ Edit `.env` file or `config.js` to customize:
 - API requests are rate-limited by default (concurrency: 1) to avoid overwhelming the API
 - Progress is logged to the console during execution
 - Errors for individual items don't stop the entire process
-- If `deputies.json` exists, it will be loaded to preserve existing deputy data
+- Every run is a full rebuild: `deputies.json`, `arrayRollCalls.json` and `motions.min/` are overwritten (nothing is loaded from a previous run). Themes are preserved through `proposicoes_temas.json`
 
 ## Memory Considerations
 

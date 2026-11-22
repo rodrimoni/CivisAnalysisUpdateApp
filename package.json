@@ -7,7 +7,11 @@
   "scripts": {
     "fetch": "node scripts/fetch-all-data.js",
     "start": "node scripts/fetch-all-data.js",
-    "classify": "node scripts/classify-themes.js"
+    "classify": "node scripts/classify-themes.js",
+    "check-themes": "node scripts/check-themes.js",
+    "freeze-themes": "node scripts/freeze-themes.js",
+    "compare-prod": "node scripts/compare-prod.js",
+    "merge-prod": "node scripts/merge-prod.js"
   },
   "keywords": [
     "camara",
